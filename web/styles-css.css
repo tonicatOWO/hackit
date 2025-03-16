@@ -1,0 +1,799 @@
+/* 基本樣式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Microsoft JhengHei', Arial, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden; /* 防止整頁滾動 */
+}
+
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 頁首樣式 */
+header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.slogan {
+    color: #999;
+    font-size: 16px;
+}
+
+/* 金額顯示區域 - 現在位於頂部 */
+.balance-section {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin: 15px auto;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.balance-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.balance-label {
+    color: #999;
+    font-size: 16px;
+}
+
+.balance-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* 主內容區域 */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden; /* 確保不會在這個層級出現滾動條 */
+}
+
+/* 新的布局容器 */
+.main-container {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    height: calc(100vh - 170px); /* 調整高度以適應固定頭部和金額顯示 */
+    max-height: 700px; /* 設置最大高度 */
+}
+
+/* 圖表區域 - 現在是左側主要部分 */
+.chart-section {
+    flex: 1;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 交易面板 - 右側區域 */
+.trade-panel {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 買賣按鈕容器 */
+.buttons-container {
+    display: flex;
+    gap: 10px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn {
+    flex: 1;
+    padding: 15px 10px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.buy-btn {
+    background-color: #4caf50;
+    color: white;
+}
+
+.buy-btn:hover {
+    background-color: #3d8b40;
+}
+
+.sell-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.sell-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* 圖表標籤樣式 */
+.chart-labels {
+    display: flex;
+    justify-content: space-between; /* 將標籤分散到兩邊 */
+    margin-bottom: 15px;
+    padding: 0 0; /* 移除左右內邊距，讓標籤可以完全貼邊 */
+}
+
+.chart-label {
+    padding: 6px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 左側標籤樣式 */
+.chart-label-left {
+    background-color: rgba(0, 102, 255, 0.2); /* 更鮮明的藍色背景 */
+    color: #0066ff;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-left: 20px;
+}
+
+/* 右側標籤樣式 */
+.chart-label-right {
+    background-color: rgba(255, 51, 51, 0.2); /* 紅色背景 */
+    color: #ff3333;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-right: 20px;
+    text-align: right;
+}
+
+.chart-container {
+    position: relative;
+    flex: 1; /* 佔用剩餘空間 */
+    width: 100%;
+    margin-bottom: 20px; /* 為日期標籤留出空間 */
+}
+
+/* 時間線樣式 */
+.timeline-marker {
+    position: absolute;
+    top: 0;
+    bottom: 40px;
+    width: 2px;
+    background-color: rgba(255, 255, 255, 0.7); /* 更明顯的白色時間線 */
+    z-index: 5;
+    /* 不預設位置，完全由 JS 動態設置 */
+    transform: translateX(-50%); /* 確保線條居中於數據點 */
+}
+
+/* 添加一個"現在"的標記在時間線右側 */
+.timeline-marker::before {
+    content: '現在';
+    position: absolute;
+    top: 10px;
+    left: auto; /* 移除左側定位 */
+    right: -50px; /* 向右偏移 */
+    transform: none; /* 移除原有的X軸居中轉換 */
+    background-color: rgba(255, 51, 51, 0.8); /* 使用紅色背景與未來趨勢一致 */
+    color: white;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* 未來趨勢區域 */
+.future-trend-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 51, 51, 0.05); /* 非常淡的紅色 */
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* 日期標籤容器 */
+.date-labels-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    padding-top: 20px;
+}
+
+.date-label {
+    color: #999;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* 價格標示和網格線 */
+.price-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    z-index: 2;
+}
+
+.price-label {
+    position: absolute;
+    right: 5px;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 12px;
+    z-index: 3;
+    min-width: 60px;
+    text-align: right;
+}
+
+.price-tag {
+    position: absolute;
+    right: 5px;
+    transform: translateY(-50%);
+    background-color: #0066ff; /* 藍色標籤 */
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 10;
+}
+
+/* 交易紀錄樣式 */
+.history-section {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #333;
+}
+
+.history-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.transaction-count {
+    font-size: 14px;
+    color: #999;
+}
+
+.history-content {
+    flex: 1;
+    overflow-y: auto; /* 只有交易記錄區域可滾動 */
+    padding: 10px;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #333;
+    transition: background-color 0.2s;
+}
+
+.history-item:hover {
+    background-color: #2a2a2a;
+}
+
+.history-item.buy {
+    border-left: 3px solid #4caf50;
+}
+
+.history-item.sell {
+    border-left: 3px solid #f44336;
+}
+
+.transaction-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.transaction-type {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.transaction-date {
+    font-size: 12px;
+    color: #999;
+}
+
+.transaction-amount {
+    font-weight: bold;
+}
+
+.transaction-amount.positive {
+    color: #4caf50;
+}
+
+.transaction-amount.negative {
+    color: #f44336;
+}
+
+.no-records {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #666;
+    font-style: italic;
+}
+
+/* 交易標記樣式 */
+.trade-marker {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+}
+
+.trade-marker.buy {
+    background-color: #4caf50;
+    border: 2px solid white;
+}
+
+.trade-marker.sell {
+    background-color: #f44336;
+    border: 2px solid white;
+}
+
+/* 響應式調整 */
+@media (max-width: 960px) {
+    .main-container {
+        flex-direction: column;
+        height: calc(100vh - 190px);
+    }
+    
+    .trade-panel {
+        width: 100%;
+        flex-direction: row;
+    }
+    
+    .buttons-container {
+        width: 250px;
+    }
+    
+    .history-section {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .trade-panel {
+        flex-direction: column;
+    }
+    
+    .buttons-container {
+        width: 100%;
+    }
+    
+    .balance-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .main-container {
+        height: calc(100vh - 220px);
+    }
+}
+
+@media (max-width: 600px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .btn {
+        padding: 10px;
+    }
+}
+/* 滑出提示樣式 */
+.notification-container {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    pointer-events: none; /* 允許點擊通知底下的元素 */
+}
+
+.notification {
+    background-color: #1e1e1e;
+    color: white;
+    padding: 15px 20px;
+    margin: 10px 0;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.5);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease-out;
+    width: 250px;
+    pointer-events: auto; /* 讓通知可點擊 */
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.buy {
+    border-left: 5px solid #4caf50;
+}
+
+.notification.sell {
+    border-left: 5px solid #f44336;
+}
+
+.notification-icon {
+    margin-right: 15px;
+    font-size: 24px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.notification-price {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.notification-close {
+    background: transparent;
+    border: none;
+    color: #999;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.notification-close:hover {
+    color: white;
+}
+
+/* 為通知添加動畫效果 */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.notification.show {
+    animation: pulse 2s infinite;
+}
+
+/* 超大型彈幕通知樣式 */
+.mega-notification-container {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2000;
+    width: 100%;
+    pointer-events: none;
+}
+
+.mega-notification {
+    background-color: rgba(30, 30, 30, 0.9);
+    color: white;
+    padding: 30px;
+    margin: 0 auto;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    transform: translateX(-110%);
+    transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+    width: 80%;
+    max-width: 1000px;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    border: 8px solid #ff00ff;
+}
+
+.mega-notification.show {
+    transform: translateX(0);
+}
+
+.mega-notification-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: spin 2s infinite linear;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.mega-notification-title {
+    font-weight: bold;
+    font-size: 60px;
+    margin-bottom: 15px;
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+}
+
+.mega-notification-message {
+    font-size: 40px;
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+.mega-notification-detail {
+    font-size: 30px;
+    color: #33ff33;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.mega-notification-close {
+    background: #ff00ff;
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 10px 30px;
+    margin-top: 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.mega-notification-close:hover {
+    background: white;
+    color: #ff00ff;
+    transform: scale(1.1);
+}
+
+/* 為通知添加動畫效果 */
+@keyframes pulse-mega {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 255, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(255, 0, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 255, 0); }
+}
+
+.mega-notification.show {
+    animation: pulse-mega 1.5s infinite;
+}
+
+/* 背景閃爍效果 */
+@keyframes background-flash {
+    0% { background-color: rgba(30, 30, 30, 0.9); }
+    50% { background-color: rgba(75, 0, 75, 0.9); }
+    100% { background-color: rgba(30, 30, 30, 0.9); }
+}
+
+.mega-notification.show {
+    animation: background-flash 2s infinite, pulse-mega 1.5s infinite;
+}
+
+/* 幣安整合樣式 */
+.crypto-selector {
+    background-color: #1e1e1e;
+    border-radius: 10px 10px 0 0;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.crypto-selector label {
+    color: #ccc;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.crypto-selector select {
+    background-color: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+.crypto-selector select:hover {
+    border-color: #666;
+}
+
+.crypto-selector select:focus {
+    border-color: #0066ff;
+    box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+}
+
+/* 更新價格標籤樣式 */
+.price-tag {
+    background-color: #0066ff;
+    animation: price-pulse 2s infinite;
+}
+
+@keyframes price-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 102, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 102, 255, 0);
+    }
+}
+
+/* 添加幣安標誌 */
+.binance-logo {
+    height: 30px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+/* 價格變化指示器 */
+.price-change {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.price-change.positive {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.price-change.negative {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+/* 加密貨幣價格表 */
+.crypto-price-table {
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.crypto-price-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.crypto-price-table th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    color: #ccc;
+    font-weight: normal;
+}
+
+.crypto-price-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #333;
+}
+
+.crypto-price-table tr:last-child td {
+    border-bottom: none;
+}
+
+.crypto-price-table tr:hover {
+    background-color: #252525;
+}
+
+.crypto-name {
+    font-weight: bold;
+    color: white;
+}
+
+.crypto-symbol {
+    color: #999;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.crypto-price {
+    font-weight: bold;
+    text-align: right;
+}
+
+/* 更新Logo樣式 */
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .crypto-selector {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .crypto-selector label {
+        margin-bottom: 5px;
+    }
+    
+    .crypto-selector select {
+        width: 100%;
+    }
+}
