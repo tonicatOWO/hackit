@@ -38,14 +38,29 @@ async function initializeApp() {
         // 獲取股票數據
         const stockData = await generateStockData();
         
-        // 創建圖表
-        const labels = createStockChart(stockData);
-        
-        // 創建日期標籤
-        createDateLabels(labels);
-        
-        // 添加價格標籤
-        addIntegerPriceLabels(stockData.allData);
+        // 檢查是否已經有創建好的圖表（可能由 WebSocket 功能創建）
+        if (!window.stockChart) {
+            // 如果沒有圖表，使用我們的 stockData 創建
+            const labels = createStockChart(stockData);
+            
+            // 創建日期標籤
+            if (typeof createDateLabels === 'function') {
+                createDateLabels(labels);
+            }
+            
+            // 添加價格標籤
+            if (typeof addIntegerPriceLabels === 'function') {
+                addIntegerPriceLabels(stockData.allData);
+            }
+        } else {
+            // 圖表已經存在，確保我們的全局變量正確設置
+            console.log("圖表已經由 WebSocket 功能創建，進行協調...");
+            
+            // 確保全局變量已正確設置
+            if (!window.allData) window.allData = stockData.allData;
+            if (window.currentIndex === undefined) window.currentIndex = stockData.past.length - 1;
+            if (!window.currentStockPrice) window.currentStockPrice = stockData.past[stockData.past.length - 1];
+        }
         
     } catch (error) {
         console.error('初始化應用程式時出錯:', error);
@@ -54,11 +69,21 @@ async function initializeApp() {
 
 // 更新餘額顯示 - 保持原有格式
 function updateBalanceDisplay() {
-    document.getElementById('balanceDisplay').textContent = `$${balance.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    const balanceElement = document.getElementById('balanceDisplay');
+    if (balanceElement) {
+        balanceElement.textContent = `$${balance.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    }
 }
 
 // 買入股票
 function buyStock() {
+    // 確保我們有當前股價
+    if (!window.allData || window.currentIndex === undefined) {
+        console.error("無法獲取當前股價");
+        alert("無法獲取當前股價，請稍後再試");
+        return;
+    }
+    
     // 獲取當前股價
     const currentPrice = window.allData[window.currentIndex];
     
@@ -86,6 +111,13 @@ function buyStock() {
 function sellStock() {
     // 確認有股票可以賣出
     if (shares > 0) {
+        // 確保我們有當前股價
+        if (!window.allData || window.currentIndex === undefined) {
+            console.error("無法獲取當前股價");
+            alert("無法獲取當前股價，請稍後再試");
+            return;
+        }
+        
         // 獲取當前股價
         const currentPrice = window.allData[window.currentIndex];
         
@@ -129,10 +161,18 @@ function addTransaction(type, quantity, price) {
 // 更新交易歷史顯示
 function updateTransactionHistory() {
     const historyContainer = document.getElementById('transactionHistory');
+    if (!historyContainer) {
+        console.error("找不到交易歷史容器");
+        return;
+    }
+    
     historyContainer.innerHTML = '';
     
     // 更新交易筆數
-    document.getElementById('transactionCount').textContent = `${transactions.length} 筆交易`;
+    const countElement = document.getElementById('transactionCount');
+    if (countElement) {
+        countElement.textContent = `${transactions.length} 筆交易`;
+    }
     
     // 添加交易記錄項目
     transactions.forEach(transaction => {
@@ -164,14 +204,30 @@ function updateTransactionHistory() {
 // 添加交易標記到圖表
 function addTradeMarker(type, index) {
     const chartContainer = document.querySelector('.chart-container');
+    if (!chartContainer) {
+        console.error("找不到圖表容器");
+        return;
+    }
+    
+    // 確保我們有全局數據
+    if (!window.allData) {
+        console.error("找不到全局數據");
+        return;
+    }
     
     // 找到數據的最小值和最大值
-    const min = Math.floor(Math.min(...window.allData.filter(val => val !== null)));
-    const max = Math.ceil(Math.max(...window.allData.filter(val => val !== null)));
+    const filteredData = window.allData.filter(val => val !== null);
+    const min = Math.floor(Math.min(...filteredData));
+    const max = Math.ceil(Math.max(...filteredData));
     const range = max - min;
     
     // 獲取當前價格和位置百分比
     const price = window.allData[index];
+    if (price === undefined || price === null) {
+        console.error("找不到指定索引的價格數據");
+        return;
+    }
+    
     const pricePercent = (price - min) / range;
     const xPercent = (index / (window.allData.length - 1)) * 100;
     
@@ -257,6 +313,16 @@ function showTradeNotification(type, message, price) {
 
 // 從後端獲取交易提示
 async function getTradeRecommendation() {
+    // 確保我們有當前股價
+    if (!window.currentStockPrice && (!window.allData || window.currentIndex === undefined)) {
+        console.warn("無法獲取當前股價，使用默認值");
+        return {
+            action: Math.random() > 0.5 ? 'buy' : 'sell',
+            message: "根據技術分析，這可能是一個交易機會。",
+            price: 84000.00 // 默認比特幣價格
+        };
+    }
+    
     // 實際應用中應該從後端API獲取
     return new Promise(resolve => {
         // 隨機決定買入或賣出
@@ -265,14 +331,14 @@ async function getTradeRecommendation() {
         // 根據動作提供不同的建議訊息
         const messages = {
             buy: [
-                '根據我們的分析，股價將在短期內上漲。現在是買入的好時機！',
+                '根據我們的分析，比特幣價格將在短期內上漲。現在是買入的好時機！',
                 '市場情緒積極，技術指標看漲。建議立即買入！',
-                '股票已觸及支撐位，預計即將反彈。買入機會來了！'
+                '比特幣已觸及支撐位，預計即將反彈。買入機會來了！'
             ],
             sell: [
-                '技術指標顯示股價已達阻力位，建議賣出以鎖定利潤。',
+                '技術指標顯示比特幣價格已達阻力位，建議賣出以鎖定利潤。',
                 '市場情緒轉向悲觀，建議賣出以避免潛在損失。',
-                '股價即將面臨下跌風險，現在賣出可能是明智選擇。'
+                '比特幣價格即將面臨下跌風險，現在賣出可能是明智選擇。'
             ]
         };
         
@@ -295,9 +361,6 @@ function handleTradeRecommendation(recommendation) {
 
 // 設置交易建議監聽器
 function setupTradeRecommendationListener() {
-    // 這裡可以是WebSocket連接
-    // 例如: const socket = new WebSocket('wss://your-backend.com/trade-recommendations');
-    
     // 模擬接收到交易建議的事件
     window.receiveTradeRecommendation = function(type, message, price) {
         handleTradeRecommendation({ type, message, price });
@@ -308,9 +371,6 @@ function setupTradeRecommendationListener() {
     const sellButton = document.getElementById('sellBtn');
     
     if (buyButton) {
-        // 保存原有的點擊事件
-        const originalBuyClick = buyButton.onclick;
-        
         // 添加新的點擊事件
         buyButton.addEventListener('click', async function() {
             // 20毫秒後顯示交易提示
@@ -322,9 +382,6 @@ function setupTradeRecommendationListener() {
     }
     
     if (sellButton) {
-        // 保存原有的點擊事件
-        const originalSellClick = sellButton.onclick;
-        
         // 添加新的點擊事件
         sellButton.addEventListener('click', async function() {
             // 20毫秒後顯示交易提示
@@ -359,15 +416,15 @@ function showMegaNotification() {
     
     // 創建不符合常理的訊息內容
     const crazyMessages = [
-        "你的股票正被外星人監控中！",
+        "你的比特幣正被外星人監控中！",
         "警告：你的投資決策正影響平行宇宙的經濟！",
-        "檢測到時間旅行者正在購買此股票！",
-        "股票AI已經開始產生自我意識！快逃！",
-        "當你看股票時，股票也在看著你！",
+        "檢測到時間旅行者正在購買比特幣！",
+        "加密貨幣AI已經開始產生自我意識！快逃！",
+        "當你看比特幣時，比特幣也在看著你！",
         "你的交易數據正被用於訓練超級AI！",
-        "這支股票因為量子糾纏正與比特幣同步波動！",
-        "神秘的股市預言家表示這支股票將在週五消失！",
-        "警告：這支股票可能是現實模擬中的虛擬資產！"
+        "比特幣因為量子糾纏正與世界金融系統同步波動！",
+        "神秘的加密貨幣預言家表示比特幣將在週五消失！",
+        "警告：這只是現實模擬中的虛擬資產！"
     ];
     
     // 隨機選擇一個瘋狂訊息
@@ -457,25 +514,29 @@ function setupCrazyNotifications() {
     const buyBtn = document.getElementById('buyBtn');
     const sellBtn = document.getElementById('sellBtn');
     
-    // 為買入按鈕添加新的事件處理
-    buyBtn.addEventListener('click', function() {
-        // 50%的機率觸發瘋狂通知
-        if (Math.random() > 0.5) {
-            setTimeout(() => {
-                showMegaNotification();
-            }, 2000);
-        }
-    });
+    if (buyBtn) {
+        // 為買入按鈕添加新的事件處理
+        buyBtn.addEventListener('click', function() {
+            // 50%的機率觸發瘋狂通知
+            if (Math.random() > 0.5) {
+                setTimeout(() => {
+                    showMegaNotification();
+                }, 2000);
+            }
+        });
+    }
     
-    // 為賣出按鈕添加新的事件處理
-    sellBtn.addEventListener('click', function() {
-        // 50%的機率觸發瘋狂通知
-        if (Math.random() > 0.5) {
-            setTimeout(() => {
-                showMegaNotification();
-            }, 2000);
-        }
-    });
+    if (sellBtn) {
+        // 為賣出按鈕添加新的事件處理
+        sellBtn.addEventListener('click', function() {
+            // 50%的機率觸發瘋狂通知
+            if (Math.random() > 0.5) {
+                setTimeout(() => {
+                    showMegaNotification();
+                }, 2000);
+            }
+        });
+    }
 }
 
 // 添加測試功能
@@ -483,10 +544,18 @@ function addTestFunction() {
     window.showCrazyNotification = showMegaNotification;
     
     window.testNotification = function(type) {
-        const price = window.allData ? window.allData[window.currentIndex] : 100;
-        const message = type === 'buy' 
-            ? '技術分析顯示市場看漲，建議現在買入' 
+        let price = 84000.00; // 默認價格
+        
+        if (window.allData && window.currentIndex !== undefined) {
+            price = window.allData[window.currentIndex];
+        } else if (window.currentStockPrice) {
+            price = window.currentStockPrice;
+        }
+        
+        const message = type === 'buy'
+            ? '技術分析顯示市場看漲，建議現在買入'
             : '市場有下跌風險，建議現在賣出';
         window.receiveTradeRecommendation(type, message, price);
     };
 }
+
